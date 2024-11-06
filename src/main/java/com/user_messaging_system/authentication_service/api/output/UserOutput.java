@@ -3,7 +3,7 @@ package com.user_messaging_system.authentication_service.api.output;
 import java.util.List;
 
 public class UserOutput{
-
+    private String id;
     private String email;
     private String name;
     private String lastName;
@@ -56,5 +56,13 @@ public class UserOutput{
 
     public void setRoles(List<String> roles) {
         this.roles = roles;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }
