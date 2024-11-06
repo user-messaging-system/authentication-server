@@ -3,6 +3,7 @@ package com.user_messaging_system.authentication_service.service;
 import com.user_messaging_system.authentication_service.api.output.UserOutput;
 import com.user_messaging_system.authentication_service.client.UserClient;
 import com.user_messaging_system.core_library.response.SuccessResponse;
+import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -24,6 +25,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     @Override
+    @Retry(name = "load-user-retry", fallbackMethod = "getByEmail_Fallback")
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         ResponseEntity<SuccessResponse<UserOutput>> userOutputResponseEntity = userClient.getByEmail(username);
         UserOutput userOutput = checkUserOutput(userOutputResponseEntity);
