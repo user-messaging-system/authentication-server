@@ -2,8 +2,9 @@ package com.user_messaging_system.authentication_service.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.user_messaging_system.authentication_service.api.input.LoginInput;
-import com.user_messaging_system.authentication_service.service.JWTService;
+import com.user_messaging_system.core_library.response.CustomUserDetails;
 import com.user_messaging_system.core_library.response.SuccessResponse;
+import com.user_messaging_system.core_library.service.JWTService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -57,26 +58,11 @@ public class CustomAuthenticationFilter extends AbstractAuthenticationProcessing
             Authentication authResult
     ) throws IOException, ServletException {
         SecurityContextHolder.getContext().setAuthentication(authResult);
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.setStatus(HttpStatus.OK.value());
 
-        String accessToken = jwtService.generateJwtToken(
-                authResult.getName(),
-                authResult.getAuthorities().stream()
-                        .map(GrantedAuthority::getAuthority)
-                        .collect(Collectors.toList())
-        );
+        CustomUserDetails userDetails = (CustomUserDetails) authResult.getPrincipal();
+        String accessToken = generateAccessToken(userDetails);
 
-        Map<String, String> data = new HashMap<>();
-        data.put("accessToken", accessToken);
-
-        SuccessResponse<Map<String, String>> responseData = new SuccessResponse<>(
-                "Login successful",
-                data,
-                String.valueOf(HttpStatus.OK)
-        );
-
-        new ObjectMapper().writeValue(response.getOutputStream(), responseData);
+        sendSuccessResponse(response, accessToken);
     }
 
     @Override
@@ -92,4 +78,29 @@ public class CustomAuthenticationFilter extends AbstractAuthenticationProcessing
         return new ObjectMapper().readValue(request.getInputStream(), LoginInput.class);
     }
 
+    private void sendSuccessResponse(HttpServletResponse response, String accessToken) throws IOException {
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setStatus(HttpStatus.OK.value());
+
+        Map<String, String> data = new HashMap<>();
+        data.put("accessToken", accessToken);
+
+        SuccessResponse<Map<String, String>> responseData = new SuccessResponse<>(
+            "Login successful",
+            data,
+            String.valueOf(HttpStatus.OK)
+        );
+
+        new ObjectMapper().writeValue(response.getOutputStream(), responseData);
+    }
+
+    private String generateAccessToken(CustomUserDetails userDetails) {
+        return jwtService.generateJwtToken(
+            userDetails.getUsername(),
+            userDetails.getId(),
+            userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList())
+        );
+    }
 }
