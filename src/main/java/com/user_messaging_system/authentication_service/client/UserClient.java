@@ -9,6 +9,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @FeignClient(name = "user-service")
 public interface UserClient {
-    @GetMapping("v1/api/users/by-email")
+    @GetMapping("/v1/api/users/by-email")
     ResponseEntity<SuccessResponse<UserOutput>> getByEmail(@RequestParam String email);
 }
