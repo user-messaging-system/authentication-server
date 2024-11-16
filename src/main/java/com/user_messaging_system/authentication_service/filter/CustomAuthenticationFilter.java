@@ -46,7 +46,7 @@ public class CustomAuthenticationFilter extends AbstractAuthenticationProcessing
     ) throws AuthenticationException, IOException, ServletException {
         LoginInput loginInput = obtainLoginInput(request);
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
-                new UsernamePasswordAuthenticationToken(loginInput.email(), loginInput.password());
+            new UsernamePasswordAuthenticationToken(loginInput.email(), loginInput.password());
         return authenticationManager.authenticate(usernamePasswordAuthenticationToken);
     }
 

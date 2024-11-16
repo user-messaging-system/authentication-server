@@ -22,7 +22,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         UserDetails userDetails = customUserDetailsService.loadUserByUsername(authentication.getName());
 
         if (checkPassword((String) authentication.getCredentials(), userDetails.getPassword())) {
-            return new UsernamePasswordAuthenticationToken(userDetails.getUsername(), userDetails.getPassword(), userDetails.getAuthorities());
+            return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
         }
 
         throw new BadCredentialsException("Bad credentials");
