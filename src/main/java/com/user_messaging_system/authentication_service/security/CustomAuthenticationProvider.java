@@ -1,12 +1,13 @@
 package com.user_messaging_system.authentication_service.security;
 
 import com.user_messaging_system.authentication_service.service.CustomUserDetailsService;
+import com.user_messaging_system.core_library.exception.UserNotFoundException;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -19,13 +20,12 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        UserDetails userDetails = customUserDetailsService.loadUserByUsername(authentication.getName());
-
-        if (checkPassword((String) authentication.getCredentials(), userDetails.getPassword())) {
-            return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        try {
+            UserDetails userDetails = customUserDetailsService.loadUserByUsername(authentication.getName());
+            return validatePassword((String) authentication.getCredentials(), userDetails.getPassword(), userDetails);
+        } catch (UserNotFoundException e) {
+            throw new UsernameNotFoundException(e.getMessage(), e);
         }
-
-        throw new BadCredentialsException("Bad credentials");
     }
 
     @Override
@@ -33,7 +33,11 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         return authentication.equals(UsernamePasswordAuthenticationToken.class);
     }
 
-    private boolean checkPassword(String requestedPassword, String dbPassword) {
-        return requestedPassword.equals(dbPassword);
+    private Authentication validatePassword(String requestedPassword, String dbPassword, UserDetails userDetails) {
+        if (requestedPassword.equals(dbPassword)) {
+            return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        }else{
+            throw new UserNotFoundException("UserNotFoundException");
+        }
     }
 }
