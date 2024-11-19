@@ -1,5 +1,6 @@
 package com.user_messaging_system.authentication_service.security;
 
+import com.user_messaging_system.authentication_service.exception.CustomAuthenticationFailureHandler;
 import com.user_messaging_system.authentication_service.filter.CustomAuthenticationFilter;
 import com.user_messaging_system.core_library.service.JWTService;
 import org.springframework.context.annotation.Bean;
@@ -31,11 +32,11 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
-            AuthenticationConfiguration authenticationConfiguration
-    ) throws Exception {
+            AuthenticationConfiguration authenticationConfiguration,
+            CustomAuthenticationFailureHandler customAuthenticationFailureHandler) throws Exception {
          http.csrf(AbstractHttpConfigurer::disable)
                  .cors(AbstractHttpConfigurer::disable)
-                .addFilterBefore(new CustomAuthenticationFilter(authenticationManager(authenticationConfiguration), jwtService), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new CustomAuthenticationFilter(authenticationManager(authenticationConfiguration), jwtService, customAuthenticationFailureHandler), UsernamePasswordAuthenticationFilter.class)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .logout(AbstractHttpConfigurer::disable)
