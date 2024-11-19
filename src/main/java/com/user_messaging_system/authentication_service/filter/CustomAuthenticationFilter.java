@@ -2,6 +2,7 @@ package com.user_messaging_system.authentication_service.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.user_messaging_system.authentication_service.api.input.LoginInput;
+import com.user_messaging_system.authentication_service.exception.CustomAuthenticationFailureHandler;
 import com.user_messaging_system.core_library.response.CustomUserDetails;
 import com.user_messaging_system.core_library.response.SuccessResponse;
 import com.user_messaging_system.core_library.service.JWTService;
@@ -33,10 +34,15 @@ public class CustomAuthenticationFilter extends AbstractAuthenticationProcessing
     private static final AntPathRequestMatcher DEFAULT_ANT_PATH_REQUEST_MATCHER =
             new AntPathRequestMatcher(USER_LOGIN_URL, "POST");
 
-    public CustomAuthenticationFilter(AuthenticationManager authenticationManager, JWTService jwtService){
+    public CustomAuthenticationFilter(
+        AuthenticationManager authenticationManager,
+        JWTService jwtService,
+        CustomAuthenticationFailureHandler customAuthenticationFailureHandler
+    ){
         super(DEFAULT_ANT_PATH_REQUEST_MATCHER);
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
+        setAuthenticationFailureHandler(customAuthenticationFailureHandler);
     }
 
     @Override
@@ -72,6 +78,7 @@ public class CustomAuthenticationFilter extends AbstractAuthenticationProcessing
             AuthenticationException failed
     ) throws IOException, ServletException {
         super.unsuccessfulAuthentication(request, response, failed);
+        this.getFailureHandler().onAuthenticationFailure(request, response, failed);
     }
 
     private LoginInput obtainLoginInput(HttpServletRequest request) throws IOException {
