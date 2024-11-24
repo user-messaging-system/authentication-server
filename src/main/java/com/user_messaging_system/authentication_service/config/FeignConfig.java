@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class FeignConfig {
-
     @Bean
     public UserErrorDecoder userErrorDecoder(){
         return new UserErrorDecoder();
