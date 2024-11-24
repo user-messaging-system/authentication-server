@@ -15,8 +15,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
@@ -30,23 +29,23 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Retry(name = "load-user-retry", fallbackMethod = "getByEmail_Fallback")
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         ResponseEntity<SuccessResponse<UserOutput>> userOutputResponseEntity = userClient.getByEmail(username);
-        UserOutput userOutput = checkUserOutput(userOutputResponseEntity);
+        UserOutput userOutput = validateUserOutput(userOutputResponseEntity);
         return new CustomUserDetails(
                 userOutput.id(),
                 userOutput.email(),
                 userOutput.password(),
-                userOutput.roles().stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList())
+                userOutput.roles().stream().map(SimpleGrantedAuthority::new).toList()
         );
     }
 
-    private UserOutput checkUserOutput(ResponseEntity<SuccessResponse<UserOutput>> userOutputResponseEntity){
-        if(Objects.nonNull(userOutputResponseEntity) && Objects.nonNull(userOutputResponseEntity.getBody())){
-            return userOutputResponseEntity.getBody().getData();
-        }
-        throw new UserNotFoundException("User not found");
+    private UserOutput validateUserOutput(ResponseEntity<SuccessResponse<UserOutput>> userOutputResponseEntity){
+        return Optional.ofNullable(userOutputResponseEntity)
+                .map(ResponseEntity::getBody)
+                .map(SuccessResponse::getData)
+                .orElseThrow(() -> new UserNotFoundException("User not found or data is null"));
     }
 
     private List<GrantedAuthority> getGrantedAuthority(List<String> roles){
-        return roles.stream().map(role -> (GrantedAuthority) () -> role).collect(Collectors.toList());
+        return roles.stream().map(role -> (GrantedAuthority) () -> role).toList();
     }
 }
