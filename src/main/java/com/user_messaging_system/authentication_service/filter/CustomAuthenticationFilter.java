@@ -92,11 +92,11 @@ public class CustomAuthenticationFilter extends AbstractAuthenticationProcessing
         Map<String, String> data = new HashMap<>();
         data.put("accessToken", accessToken);
 
-        SuccessResponse<Map<String, String>> responseData = new SuccessResponse<>(
-            "Login successful",
-            data,
-            String.valueOf(HttpStatus.OK)
-        );
+        SuccessResponse<Map<String, String>> responseData = new SuccessResponse.Builder<Map<String, String>>()
+                .message("Login successful")
+                .data(data)
+                .status(String.valueOf(HttpStatus.OK))
+                .build();
 
         new ObjectMapper().writeValue(response.getOutputStream(), responseData);
     }
