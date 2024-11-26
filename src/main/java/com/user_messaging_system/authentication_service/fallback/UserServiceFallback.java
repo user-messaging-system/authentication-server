@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Component
 public class UserServiceFallback {
-    public ResponseEntity<FallbackResponse> getByEmail_Fallback(){
+    public ResponseEntity<FallbackResponse> getByEmailFallback(){
         FallbackResponse fallbackResponse = new FallbackResponse(
                 "user-service",
                 "User Service is currently unavailable/ Bu mesaj getByEmail_Fallback tarafindan olusturuldu.",

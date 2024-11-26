@@ -26,7 +26,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     @Override
-    @Retry(name = "load-user-retry", fallbackMethod = "getByEmail_Fallback")
+    @Retry(name = "load-user-retry", fallbackMethod = "getByEmailFallback")
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         ResponseEntity<SuccessResponse<UserOutput>> userOutputResponseEntity = userClient.getByEmail(username);
         UserOutput userOutput = validateUserOutput(userOutputResponseEntity);
