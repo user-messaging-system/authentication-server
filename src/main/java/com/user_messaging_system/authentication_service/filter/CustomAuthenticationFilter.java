@@ -24,7 +24,6 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static com.user_messaging_system.authentication_service.constant.EndpointConstant.USER_LOGIN_URL;
 
@@ -52,7 +51,7 @@ public class CustomAuthenticationFilter extends AbstractAuthenticationProcessing
     ) throws AuthenticationException, IOException, ServletException {
         LoginInput loginInput = obtainLoginInput(request);
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
-            new UsernamePasswordAuthenticationToken(loginInput.email(), loginInput.password());
+                new UsernamePasswordAuthenticationToken(loginInput.email(), loginInput.password());
         return authenticationManager.authenticate(usernamePasswordAuthenticationToken);
     }
 
@@ -64,10 +63,8 @@ public class CustomAuthenticationFilter extends AbstractAuthenticationProcessing
             Authentication authResult
     ) throws IOException, ServletException {
         SecurityContextHolder.getContext().setAuthentication(authResult);
-
         CustomUserDetails userDetails = (CustomUserDetails) authResult.getPrincipal();
         String accessToken = generateAccessToken(userDetails);
-
         sendSuccessResponse(response, accessToken);
     }
 
@@ -105,9 +102,6 @@ public class CustomAuthenticationFilter extends AbstractAuthenticationProcessing
         return jwtService.generateJwtToken(
             userDetails.getUsername(),
             userDetails.getId(),
-            userDetails.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toList())
-        );
+            userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList());
     }
 }

@@ -8,14 +8,17 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
 public class CustomAuthenticationProvider implements AuthenticationProvider {
     private final CustomUserDetailsService customUserDetailsService;
+    private final PasswordEncoder passwordEncoder;
 
-    public CustomAuthenticationProvider(CustomUserDetailsService customUserDetailsService) {
+    public CustomAuthenticationProvider(CustomUserDetailsService customUserDetailsService, PasswordEncoder passwordEncoder) {
         this.customUserDetailsService = customUserDetailsService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -34,7 +37,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
     }
 
     private Authentication validatePassword(String requestedPassword, String dbPassword, UserDetails userDetails) {
-        if (requestedPassword.equals(dbPassword)) {
+        if (passwordEncoder.matches(requestedPassword, dbPassword)) {
             return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
         }else{
             throw new UserNotFoundException("UserNotFoundException");
