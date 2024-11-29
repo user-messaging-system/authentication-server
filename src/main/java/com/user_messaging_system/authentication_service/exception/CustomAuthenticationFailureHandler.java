@@ -13,6 +13,7 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.List;
 
 @Component
 public class CustomAuthenticationFailureHandler implements AuthenticationFailureHandler {
@@ -37,7 +38,7 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
 
         ErrorResponse errorResponse = new ErrorResponse.Builder()
                 .message(errorMessage)
-                .error("Authentication Failed")
+                .errors(List.of("Authentication Failed"))
                 .status(status)
                 .path(request.getRequestURI())
                 .build();
