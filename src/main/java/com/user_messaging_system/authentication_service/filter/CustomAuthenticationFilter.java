@@ -7,14 +7,18 @@ import com.user_messaging_system.core_library.response.CustomUserDetails;
 import com.user_messaging_system.core_library.response.ErrorResponse;
 import com.user_messaging_system.core_library.response.SuccessResponse;
 import com.user_messaging_system.core_library.service.JWTService;
+import feign.Response;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
+import jakarta.ws.rs.core.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -24,13 +28,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
+import static com.user_messaging_system.authentication_service.constant.EndpointConstant.*;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import static com.user_messaging_system.authentication_service.constant.EndpointConstant.USER_LOGIN_URL;
 
 public class CustomAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
     private final AuthenticationManager authenticationManager;
@@ -98,6 +102,15 @@ public class CustomAuthenticationFilter extends AbstractAuthenticationProcessing
     }
 
     private void sendSuccessResponse(HttpServletResponse response, String accessToken) throws IOException {
+        ResponseCookie jwtCookie = ResponseCookie.from("accessToken", accessToken)
+                .httpOnly(true)
+                .secure(true)//only development mode
+                .path("/")
+                .maxAge(432000)//5days
+                .sameSite("strict")
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, jwtCookie.toString());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setStatus(HttpStatus.OK.value());
 
